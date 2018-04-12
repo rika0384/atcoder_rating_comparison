@@ -7,6 +7,17 @@ var tableJQ = $('#rate');
 var tweetplace = $('#tweetbutton');
 var firstQuery = true;
 
+$(function() {
+    let m = new Map();
+    let xs = location.search.substring(1).split('&');
+    for (let x of xs) {
+      let p = x.split('=');
+      m.set(p[0], decodeURIComponent(p[1]));
+    }
+    if (m.has('q')) document.getElementById("handle").value = m.get('q');
+    getData();
+});
+
 function getData(){
     count = 0;
     user.length = 0;
@@ -16,6 +27,7 @@ function getData(){
       $('table tr:last').remove();
     }
     var str = document.getElementById("handle").value;
+    history.replaceState('', '', `?q=${str}`);
     user = str.split(" ");
     for(var i = 0; i < user.length; i++){
       getAtcoderRating(user[i]);
