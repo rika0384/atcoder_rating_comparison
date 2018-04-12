@@ -16,7 +16,7 @@ function getData(){
       $('table tr:last').remove();
     }
     var str = document.getElementById("handle").value;
-    user = str.split(",");
+    user = str.split(" ");
     for(var i = 0; i < user.length; i++){
       getAtcoderRating(user[i]);
     }
