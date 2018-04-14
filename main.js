@@ -24,7 +24,7 @@ function getData(){
 
 function getAtcoderRating(handle){
     var call =  function() {
-        var url = "https://atcoder.jp/user/" + handle;
+        var url = "https://atcoder.jp/user/" + handle + "?timestamp=" + (+new Date());
         var xpath = '//*[@id="main-div"]/div/div/div/script';
         var query = "select * from htmlstring where url = '" + url + "' and xpath = '" + xpath + "'";
         var yql   = "https://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=" + encodeURIComponent(query);
