@@ -5,7 +5,7 @@ var count;
 var histories = [];
 var tableJQ = $('#rate');
 var tweetplace = $('#tweetbutton');
-var firstQuery = true;
+
 
 $(function() {
     let m = new Map();
@@ -67,8 +67,13 @@ function getAtcoderRating(handle){
               count++;
 
               if(count === user.length){
+                //console.log(histories);
+                //console.log(rate);
                   histories.sort(function(a,b){ //userをレートでソート
                       return b[1][b[1].length - 1][1] - a[1][a[1].length - 1][1];
+                    });
+                  rate.sort(function(a,b){ //userをレートでソート
+                        return b[1] - a[1];
                     });
                   makeTable();
                   makeGraph();
@@ -99,50 +104,35 @@ function makeTable(){
 
       tweet += "AtCoder Rate Ranking\n"
 
-        var cnt = 1;
         var colors = ['gray','brown','green','lightskyblue','blue','gold','orange','red'];
-        for(var rating = 5000; rating > 0; rating--){
+
             for (var r = 0; r < user.length; r++) {
-                if(rate[r][1] === rating){
-                    if(cnt <= 5){
+
+                    if(r < 5){
                         var trJQ_r = $('<tr></tr>').addClass('top').appendTo(tableJQ);
                     }else{
                         var trJQ_r = $('<tr></tr>').appendTo(tableJQ);
                     }
-                    $('<td></td>').text(cnt).appendTo(trJQ_r);
+                    $('<td></td>').text(r+1).appendTo(trJQ_r); //順位
                     var url = 'https://atcoder.jp/user/';
                     url += rate[r][0];
                     var rateColor = Math.min(Math.floor(rate[r][1]/400),7);
                     $('<td></td>').append(
-                        $('<font></font>').text(rate[r][1] + ' (' + rate[r][2] + ')').attr('color',colors[rateColor])
+                        $('<font></font>').text(rate[r][1] + ' (' + rate[r][2] + ')').attr('color',colors[rateColor]) //現在のレート(最高レート)
                       ).appendTo(trJQ_r);
 
                     $('<td></td>').append(
                             $('<a></a>').append(
-                                $('<font></font>').text(rate[r][0]).attr('color',colors[rateColor])
+                                $('<font></font>').text(rate[r][0]).attr('color',colors[rateColor]) //ユーザー名
                               ).attr('href',url)
                         ).appendTo(trJQ_r);
 
-                    tweet += cnt + ". " + rate[r][0] + " (" + rate[r][1] + ")\n";
+                    tweet += r+1 + ". " + rate[r][0] + " (" + rate[r][1] + ")\n";
 
-                    cnt++;
+
 
                   }
-              }
-          }
-      //    tweet += "https://rika0384.github.io/atcoder/atcoder_rating_comparison/index.html";
-/*
-          if(firstQuery === false){
-             $(tweetplace).empty();
-          }
-*/
-/*
-        $.fn.appendTweetButton = function(url, text){
-              $(this).append($("<a href=\"https://twitter.com/share\" class=\"twitter-share-button\" data-url=\""+url+"\" data-text=\""+text+"\" data-count=\"vertical\">Tweet<\/a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');<\/script>"));
-              }
-          $("body").appendTweetButton($(location).attr('href'), tweet);
-          firstQuery = false;
-*/
+
 
         var $widget = $("#twitter-widget-0");
         var src = $widget.attr("src");
