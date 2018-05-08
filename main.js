@@ -139,7 +139,6 @@ function makeTable(){
         var url = src.replace(/\&text=.*\&/, "&text=" + encodeURIComponent(tweet) + "&");
 
         $widget.attr({src: url});
-        $widget.attr({data-url: encodeURIComponent(location.href)});
         tweetplace.html("").append($widget);
 }
 
