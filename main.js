@@ -114,7 +114,7 @@ function makeTable(){
                         var trJQ_r = $('<tr></tr>').appendTo(tableJQ);
                     }
                     $('<td></td>').text(r+1).appendTo(trJQ_r); //順位
-                    var url = 'https://atcoder.jp/user/';
+                    var url = 'https://beta.atcoder.jp/user/';
                     url += rate[r][0];
                     var rateColor = Math.min(Math.floor(rate[r][1]/400),7);
                     $('<td></td>').append(
