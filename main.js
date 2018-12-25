@@ -5,7 +5,7 @@ var count;
 var histories = [];
 var tableJQ = $('#rate');
 var tweetplace = $('#tweetbutton');
-
+var MaxRate = 3000;
 
 $(function() {
     let m = new Map();
@@ -35,73 +35,52 @@ function getData(){
 }
 
 function getAtcoderRating(handle){
-    var call =  function() {
-        var url = "https://atcoder.jp/user/" + handle + "?timestamp=" + (+new Date());
-        var xpath = '//*[@id="main-div"]/div/div/div/script';
-        var query = "select * from htmlstring where url = '" + url + "' and xpath = '" + xpath + "'";
-        var yql   = "https://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=" + encodeURIComponent(query);
-        $.ajax(
-          {
-            type     : 'GET',
-            url      : yql,
-            dataType : 'json',
-            timeout  : 10000,
-            cache    : false,
-          }).done(function(data){
-              //console.log(data);
-              var jsonStr = getAtcoderJSON(data.query.results.result);
-              var history_atcoder = JSON.parse(jsonStr);
+    var url = "https://beta.atcoder.jp/users/" + handle +"/history/json";
+    var query = "select * from json where url = '" + url + "'";
+    var yql   = "https://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=" + encodeURIComponent(query);
+    $.ajax(
+        {
+              type     : 'GET',
+              url      : yql,
+              dataType : 'json',
+              timeout  : 10000,
+              cache    : false,
+        }).done(function(data){
 
-              var highest = 0;
-              for(var i = 0; i < history_atcoder.length; i++){
-                if(highest < history_atcoder[i][1]){
-                  highest = history_atcoder[i][1];
-                }
+              console.log(data);
+              if(data.query.results == null){
+                  alert("'" + handle + "' is not found");
               }
-              rate.push([handle,history_atcoder[0][1],highest]);
-              history_atcoder.sort(function(a,b){ //日付を昇順ソート
-                return a[0] - b[0];
-                });
-
+              history_atcoder = data.query.results.json.json;
+              var highest = 0;
+              for(i = 0; i < history_atcoder.length; i++){
+                  highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
+              }
+              if(highest > MaxRate) MaxRate = highest + 400;
+              rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
               histories.push([handle,history_atcoder]);
               count++;
-
               if(count === user.length){
-                //console.log(histories);
-                //console.log(rate);
+                console.log(histories);
+                console.log(rate);
                   histories.sort(function(a,b){ //userをレートでソート
-                      return b[1][b[1].length - 1][1] - a[1][a[1].length - 1][1];
+                      return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
                     });
                   rate.sort(function(a,b){ //userをレートでソート
                         return b[1] - a[1];
                     });
                   makeTable();
                   makeGraph();
+                  MaxRate = 3000;
               }
-
-          }).fail(function(data){
+        }).fail(function(data){
               alert("Failed(AC)");
-          //    console.log(data);
-          });
-      }
-      call();
-
-}
-
-function getAtcoderJSON(src) {
-        //alert(src);
-        var idxf = src.indexOf('JSON.parse("');
-        var idxe = src.indexOf('");]]>', idxf);
-        if (idxf != -1 && idxe != -1) {
-    	     return src.slice(idxf + 12, idxe).replace(/\\/g, "");
-        }
-        return null;
+        });
 }
 
 function makeTable(){
 
       var tweet = "";
-
       tweet += "AtCoder Rate Ranking\n"
 
         var colors = ['gray','brown','green','lightskyblue','blue','gold','orange','red'];
@@ -157,9 +136,11 @@ function makeSeries(){
         //  console.log(user_id);
           var data = [];
           for(var j = 0; j < histories[i][1].length; j++){
-              var x = histories[i][1][j][0] * 1000;
-              var y = histories[i][1][j][1];
-              var contestName = histories[i][1][j][3];
+              console.log(histories[i][1][j]);
+              if(histories[i][1][j]['IsRated'] != "true")continue;
+              var x = new Date(histories[i][1][j]['EndTime']);
+              var y = Number(histories[i][1][j]['NewRating']);
+              var contestName = histories[i][1][j]['ContestName'];
               data.push({x, y, contestName, user_id});
           }
           ret.push({name:user_id,data});
@@ -171,6 +152,8 @@ function makeSeries(){
 
 
 function makeGraph(){
+
+    //console.log(MaxRate);
 
     new Highcharts.Chart({
             title: { text: null },
@@ -185,8 +168,8 @@ function makeGraph(){
             xAxis: {
               type: 'datetime',
               title: { text: null },
-              dateTimeLabelFormats: { year: '%Y' },
-              tickInterval: 30758400000
+              dateTimeLabelFormats: {month: '%b \'%y', year: '%Y'},
+              tickInterval: 30758400000/4
             },
             yAxis: {
               min: 0,
@@ -194,7 +177,7 @@ function makeGraph(){
               title: { text: null },
               plotLines: [{ value: 0, width: 1, color: '#808080' }],
               tickInterval: 400,
-              max: 3200,
+              max: MaxRate,
               plotBands: [
                 { "from": 0, "to": 400 -1, "color": '#F9F9F9' },
                 { "from": 400, "to": 800 - 1, "color": '#F9E6D3' },
