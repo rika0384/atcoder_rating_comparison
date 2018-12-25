@@ -48,7 +48,7 @@ function getAtcoderRating(handle){
         }).done(function(data){
 
               console.log(data);
-              if(data.query.results == null){
+              if(handle != "" && data.query.results == null){
                   alert("'" + handle + "' is not found");
               }
               history_atcoder = data.query.results.json.json;
