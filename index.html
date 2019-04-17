@@ -4,11 +4,14 @@
     <meta charset="utf-8">
     <title>AtCoder Rating Comparison</title>
     <link rel="stylesheet" href="./main.css">
+    <!-- javascript fetch API -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
 </head>
 <body>
     <h1>AtCoder Rating Comparison</h1>
+    <p>ここは<a href="https://atcoder.jp" target="_blank">AtCoder</a>のレートを比較するサイトです</p>
     <p>AtCoder IDをスペース区切りで入力してください</p>
-    <input class="form" type="text" id="handle">
+    <input class="form" type="text" id="handle" placeholder="chokudai">
     <button type="submit" onclick="getData()">send</button>
     <h2>Rate History</h2>
     <div id="graph-container"></div>

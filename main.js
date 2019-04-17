@@ -6,6 +6,8 @@ var histories = [];
 var tableJQ = $('#rate');
 var tweetplace = $('#tweetbutton');
 var MaxRate = 3000;
+var now;
+var query_time;
 
 $(function() {
     let m = new Map();
@@ -19,6 +21,8 @@ $(function() {
 });
 
 function getData(){
+    now = new Date();
+    query_time = Math.floor(now/300);
     count = 0;
     user.length = 0;
     rate.length = 0;
@@ -28,54 +32,137 @@ function getData(){
     }
     var str = document.getElementById("handle").value;
     history.replaceState('', '', `?q=${str}`);
-    user = str.split(" ");
+    var tmp = str.split(" ");
+    for(var i = 0; i < tmp.length; i++){
+        if(tmp[i] != "") user.push(tmp[i]);
+    }
     for(var i = 0; i < user.length; i++){
       getAtcoderRating(user[i]);
     }
 }
-
+/*
+function getJson(url){
+    return $.ajax(
+	      {
+		        type     : 'GET',
+		        url      : url,
+		        dataType : 'json',
+		        timeout  : 20000,
+		        cache    : false,
+	      });
+}
+*/
 function getAtcoderRating(handle){
-    var url = "https://beta.atcoder.jp/users/" + handle +"/history/json";
-    var query = "select * from json where url = '" + url + "'";
-    var yql   = "https://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&q=" + encodeURIComponent(query);
-    $.ajax(
-        {
-              type     : 'GET',
-              url      : yql,
-              dataType : 'json',
-              timeout  : 10000,
-              cache    : false,
-        }).done(function(data){
+/*
+    var url =
+      "ajax.php?url=https://atcoder.jp/users/"
+      + handle
+      + "/history/json";
+    getJson(url).done(function(data){
+        console.log(data);
+    }).fail(function(data){
+        alert("Failed(AC)");
+    }).always(function(data){
 
-              console.log(data);
-              if(handle != "" && data.query.results == null){
-                  alert("'" + handle + "' is not found");
-              }
-              history_atcoder = data.query.results.json.json;
-              var highest = 0;
-              for(i = 0; i < history_atcoder.length; i++){
-                  highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
-              }
-              if(highest > MaxRate) MaxRate = highest + 400;
-              rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
-              histories.push([handle,history_atcoder]);
-              count++;
-              if(count === user.length){
-                console.log(histories);
-                console.log(rate);
-                  histories.sort(function(a,b){ //userをレートでソート
-                      return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
-                    });
-                  rate.sort(function(a,b){ //userをレートでソート
-                        return b[1] - a[1];
-                    });
-                  makeTable();
-                  makeGraph();
-                  MaxRate = 3000;
-              }
-        }).fail(function(data){
-              alert("Failed(AC)");
+  });
+*/
+
+
+    var check_url = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + handle;// + "&timestamp=" + query_time;
+
+    fetch(check_url).then(function(response) {
+            return response.json();
+        }).then(function(data) {
+            //console.log(data);
+            if(data.length == 0){
+                alert("'" + handle + "' is not found");
+                /*count++;
+                if(count === user.length){
+                  console.log(histories);
+                  console.log(rate);
+                    histories.sort(function(a,b){ //userをレートでソート
+                        return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
+                      });
+                    rate.sort(function(a,b){ //userをレートでソート
+                          return b[1] - a[1];
+                      });
+                    makeTable();
+                    makeGraph();
+                    MaxRate = 3000;
+                }*/
+                return;
+            }
         });
+
+    var url = "https://atcoder.jp/users/" + handle +"/history/json";//"&timestamp=" + query_time;
+    var xurl = encodeURIComponent(url);
+
+    $.ajax({
+         url: "./ajax.php?url="+xurl,
+         dataType: 'json',
+         type: "GET",
+         timeout  : 20000,
+         cache    : false,
+         success: function(res) {
+             var xmlText = res,
+                 xmlDoc = $.parseXML(xmlText);
+             console.log(res);
+             history_atcoder = res;
+             var highest = 0;
+             for(i = 0; i < history_atcoder.length; i++){
+                 highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
+             }
+             if(highest > MaxRate) MaxRate = highest + 400;
+             rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
+             histories.push([handle,history_atcoder]);
+             count++;
+             if(count === user.length){
+               console.log(histories);
+               console.log(rate);
+                 histories.sort(function(a,b){ //userをレートでソート
+                     return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
+                   });
+                 rate.sort(function(a,b){ //userをレートでソート
+                       return b[1] - a[1];
+                   });
+                 makeTable();
+                 makeGraph();
+                 MaxRate = 3000;
+             }
+         }
+     })
+/*
+    fetch(url,{
+        //mode: 'no-cors'
+    }).then(function(response) {
+        console.log(response);
+            return response.json();
+        }).then(function(data) {
+            console.log(data);
+            history_atcoder = data.query.results.json.json;
+            var highest = 0;
+            for(i = 0; i < history_atcoder.length; i++){
+                highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
+            }
+            if(highest > MaxRate) MaxRate = highest + 400;
+            rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
+            histories.push([handle,history_atcoder]);
+            count++;
+            if(count === user.length){
+              console.log(histories);
+              console.log(rate);
+                histories.sort(function(a,b){ //userをレートでソート
+                    return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
+                  });
+                rate.sort(function(a,b){ //userをレートでソート
+                      return b[1] - a[1];
+                  });
+                makeTable();
+                makeGraph();
+                MaxRate = 3000;
+            }
+        });
+        */
 }
 
 function makeTable(){
@@ -133,19 +220,21 @@ function makeSeries(){
       for(var i = 0; i < user.length; i++){
         //  console.log(history[i]);
           var user_id = histories[i][0];
-        //  console.log(user_id);
+          //console.log(user_id);
           var data = [];
           for(var j = 0; j < histories[i][1].length; j++){
-              console.log(histories[i][1][j]);
-              if(histories[i][1][j]['IsRated'] != "true")continue;
+              //console.log(histories[i][1][j]);
+              if(histories[i][1][j]['IsRated'] != true)continue;
               var x = new Date(histories[i][1][j]['EndTime']);
               var y = Number(histories[i][1][j]['NewRating']);
               var contestName = histories[i][1][j]['ContestName'];
-              data.push({x, y, contestName, user_id});
+              var perform = histories[i][1][j]['Performance'];
+              data.push({x, y, contestName, user_id, perform});
           }
+          //console.log(data);
           ret.push({name:user_id,data});
       }
-
+      //console.log(ret);
       return ret;
 
 }
@@ -153,7 +242,7 @@ function makeSeries(){
 
 function makeGraph(){
 
-    //console.log(MaxRate);
+    console.log(MaxRate);
 
     new Highcharts.Chart({
             title: { text: null },
@@ -162,6 +251,7 @@ function makeGraph(){
                 return `<b>${this.point.user_id}</b><br />` +
                   `Contest: ${this.point.contestName}<br />` +
                   `Date: ${Highcharts.dateFormat('%e %b %Y', this.x)}<br />` +
+                  `Performance: ${this.point.perform}<br />` +
                   `Rate: ${this.y}`;
               }
             },
