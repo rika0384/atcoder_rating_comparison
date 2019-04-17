@@ -18,6 +18,12 @@ $(function() {
     }
     if (m.has('q')) document.getElementById("handle").value = m.get('q');
     getData();
+
+    $('#handle').on('keypress', function(ev) {
+        if (ev.keyCode == 13) getData();
+    })
+
+
 });
 
 function getData(){
