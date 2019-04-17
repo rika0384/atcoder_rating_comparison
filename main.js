@@ -46,32 +46,9 @@ function getData(){
       getAtcoderRating(user[i]);
     }
 }
-/*
-function getJson(url){
-    return $.ajax(
-	      {
-		        type     : 'GET',
-		        url      : url,
-		        dataType : 'json',
-		        timeout  : 20000,
-		        cache    : false,
-	      });
-}
-*/
-function getAtcoderRating(handle){
-/*
-    var url =
-      "ajax.php?url=https://atcoder.jp/users/"
-      + handle
-      + "/history/json";
-    getJson(url).done(function(data){
-        console.log(data);
-    }).fail(function(data){
-        alert("Failed(AC)");
-    }).always(function(data){
 
-  });
-*/
+function getAtcoderRating(handle){
+
 
 
     var check_url = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + handle;// + "&timestamp=" + query_time;
@@ -82,21 +59,7 @@ function getAtcoderRating(handle){
             //console.log(data);
             if(data.length == 0){
                 alert("'" + handle + "' is not found");
-                /*count++;
-                if(count === user.length){
-                  console.log(histories);
-                  console.log(rate);
-                    histories.sort(function(a,b){ //userをレートでソート
-                        return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
-                      });
-                    rate.sort(function(a,b){ //userをレートでソート
-                          return b[1] - a[1];
-                      });
-                    makeTable();
-                    makeGraph();
-                    MaxRate = 3000;
-                }*/
-                return;
+               return;
             }
         });
 
@@ -137,81 +100,48 @@ function getAtcoderRating(handle){
              }
          }
      })
-/*
-    fetch(url,{
-        //mode: 'no-cors'
-    }).then(function(response) {
-        console.log(response);
-            return response.json();
-        }).then(function(data) {
-            console.log(data);
-            history_atcoder = data.query.results.json.json;
-            var highest = 0;
-            for(i = 0; i < history_atcoder.length; i++){
-                highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
-            }
-            if(highest > MaxRate) MaxRate = highest + 400;
-            rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
-            histories.push([handle,history_atcoder]);
-            count++;
-            if(count === user.length){
-              console.log(histories);
-              console.log(rate);
-                histories.sort(function(a,b){ //userをレートでソート
-                    return Number(b[1][b[1].length - 1]['NewRating']) - Number(a[1][a[1].length - 1]['NewRating']);
-                  });
-                rate.sort(function(a,b){ //userをレートでソート
-                      return b[1] - a[1];
-                  });
-                makeTable();
-                makeGraph();
-                MaxRate = 3000;
-            }
-        });
-        */
+
 }
 
 function makeTable(){
 
-      var tweet = "";
-      tweet += "AtCoder Rate Ranking\n"
+    var tweet = "";
+    tweet += "AtCoder Rate Ranking\n";
 
-        var colors = ['gray','brown','green','lightskyblue','blue','gold','orange','red'];
+    var colors = ['gray','brown','green','lightskyblue','blue','gold','orange','red'];
 
-            for (var r = 0; r < user.length; r++) {
+    for (var r = 0; r < user.length; r++) {
 
-                    if(r < 5){
-                        var trJQ_r = $('<tr></tr>').addClass('top').appendTo(tableJQ);
-                    }else{
-                        var trJQ_r = $('<tr></tr>').appendTo(tableJQ);
-                    }
-                    $('<td></td>').text(r+1).appendTo(trJQ_r); //順位
-                    var url = 'https://beta.atcoder.jp/user/';
-                    url += rate[r][0];
-                    var rateColor = Math.min(Math.floor(rate[r][1]/400),7);
-                    $('<td></td>').append(
-                        $('<font></font>').text(rate[r][1] + ' (' + rate[r][2] + ')').attr('color',colors[rateColor]) //現在のレート(最高レート)
-                      ).appendTo(trJQ_r);
+        if(r < 5){
+            var trJQ_r = $('<tr></tr>').addClass('top').appendTo(tableJQ);
+        }else{
+            var trJQ_r = $('<tr></tr>').appendTo(tableJQ);
+        }
+        $('<td></td>').text(r+1).appendTo(trJQ_r); //順位
+        var url = 'https://beta.atcoder.jp/user/';
+        url += rate[r][0];
+        var rateColor = Math.min(Math.floor(rate[r][1]/400),7);
+        $('<td></td>').append(
+            $('<font></font>').text(rate[r][1] + ' (' + rate[r][2] + ')').attr('color',colors[rateColor]) //現在のレート(最高レート)
+          ).appendTo(trJQ_r);
 
-                    $('<td></td>').append(
-                            $('<a></a>').append(
-                                $('<font></font>').text(rate[r][0]).attr('color',colors[rateColor]) //ユーザー名
-                              ).attr('href',url)
-                        ).appendTo(trJQ_r);
+        $('<td></td>').append(
+                $('<a></a>').append(
+                    $('<font></font>').text(rate[r][0]).attr('color',colors[rateColor]) //ユーザー名
+                  ).attr('href',url)
+            ).appendTo(trJQ_r);
 
-                    tweet += r+1 + ". " + rate[r][0] + " (" + rate[r][1] + ")\n";
-
-
-
-                  }
+        tweet += r+1 + ". " + rate[r][0] + " (" + rate[r][1] + ")\n";
 
 
-        var $widget = $("#twitter-widget-0");
-        var src = $widget.attr("src");
-        var url = src.replace(/\&text=.*\&/, "&text=" + encodeURIComponent(tweet) + "&");
 
-        $widget.attr({src: url});
-        tweetplace.html("").append($widget);
+    }
+
+    $.fn.appendTweetButton = function(url, text){
+        $(this).append($("<a href=\"https://twitter.com/share\" class=\"twitter-share-button\" data-url=\""+url+"\" data-text=\""+text+"\" data-count=\"vertical\">Tweet<\/a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');<\/script>"));
+    }
+    //Tweetボタンの設置
+    $("body").appendTweetButton($(location).attr('href'), tweet);
 }
 
 
