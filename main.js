@@ -77,13 +77,15 @@ function getAtcoderRating(handle){
                  xmlDoc = $.parseXML(xmlText);
              console.log(res);
              history_atcoder = res;
-             var highest = 0;
-             for(i = 0; i < history_atcoder.length; i++){
-                 highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
+             if(history_atcoder.length >= 1){
+                 var highest = 0;
+                 for(i = 0; i < history_atcoder.length; i++){
+                     highest = Math.max(highest, Number(history_atcoder[i]['NewRating']));
+                 }
+                 if(highest > MaxRate) MaxRate = highest + 400;
+                 rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
+                 histories.push([handle,history_atcoder]);
              }
-             if(highest > MaxRate) MaxRate = highest + 400;
-             rate.push([handle,Number(history_atcoder[history_atcoder.length-1]['NewRating']),highest]);
-             histories.push([handle,history_atcoder]);
              count++;
              if(count === user.length){
                console.log(histories);
@@ -110,7 +112,7 @@ function makeTable(){
 
     var colors = ['gray','brown','green','lightskyblue','blue','gold','orange','red'];
 
-    for (var r = 0; r < user.length; r++) {
+    for (var r = 0; r < rate.length; r++) {
 
         if(r < 5){
             var trJQ_r = $('<tr></tr>').addClass('top').appendTo(tableJQ);
@@ -155,7 +157,7 @@ function makeSeries(){
 
       var ret = [];
 
-      for(var i = 0; i < user.length; i++){
+      for(var i = 0; i < histories.length; i++){
         //  console.log(history[i]);
           var user_id = histories[i][0];
           //console.log(user_id);
