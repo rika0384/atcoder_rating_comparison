@@ -13,10 +13,22 @@ $(function() {
     let m = new Map();
     let xs = location.search.substring(1).split('&');
     for (let x of xs) {
-      let p = x.split('=');
-      m.set(p[0], decodeURIComponent(p[1]));
+        let p = x.split('=');
+        m.set(p[0], decodeURIComponent(p[1]));
     }
-    if (m.has('q')) document.getElementById("handle").value = m.get('q');
+
+    if(m.has('q')){
+        let qset = new Set();
+        for(let x of m.get('q').split(' ')){
+            qset.add(x);
+        }
+        let qarr = [];
+        for(let x of qset){
+            qarr.push(x);
+        }
+        document.getElementById("handle").value = qarr.join(' ');
+    }
+
     getData();
 
     $('#handle').on('keypress', function(ev) {
