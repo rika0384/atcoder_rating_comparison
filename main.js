@@ -51,8 +51,12 @@ function getData(){
     var str = document.getElementById("handle").value;
     history.replaceState('', '', `?q=${str}`);
     var tmp = str.split(" ");
+    let qset = new Set();
     for(var i = 0; i < tmp.length; i++){
-        if(tmp[i] != "") user.push(tmp[i]);
+        if(tmp[i] != "") qset.add(tmp[i]);
+    }
+    for(let x of qset){
+        user.push(x);
     }
     for(var i = 0; i < user.length; i++){
       getAtcoderRating(user[i]);
