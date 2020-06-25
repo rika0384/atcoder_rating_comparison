@@ -2,6 +2,12 @@ body{
  text-align: center;
  margin: 50px;
 }
+.caution{
+    background-color: #FFFF99;
+    border-spacing: 5px;
+    padding: 5px;
+    font-size: 15px;
+}
 h1{
   font-size: 60px;
   color: #FE2E64;
